@@ -129,6 +129,18 @@ export interface AdminStats {
   customersChange: number;
 }
 
+// ── Admin User ───────────────────────────────────────────────
+export type AdminRole = "super_admin" | "admin";
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  full_name: string;
+  role: AdminRole;
+  is_active: boolean;
+  created_at?: string;
+}
+
 // ── API Response Wrappers ─────────────────────────────────────
 export interface ApiResponse<T> {
   data: T | null;

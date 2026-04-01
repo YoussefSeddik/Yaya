@@ -67,9 +67,56 @@ Open:
 
 _You're now running the full app locally!_
 
-## 3. Vercel Deployment (15 mins)
+## 3. Admin Users Setup (5 mins)
 
-### Step 3.1: Push to GitHub
+After running the schema (Step 1.3), you must create your first super admin manually via the Supabase dashboard.
+
+### Step 3.1: Create First Super Admin in Supabase Auth
+
+1. In your Supabase project, go to **Authentication → Users**
+2. Click **"Add user"** → **"Create new user"**
+3. Enter your admin email and a strong password
+4. Click **"Create user"** — copy the UUID shown
+
+### Step 3.2: Insert into admin_users Table
+
+Go to **SQL Editor** and run:
+
+```sql
+INSERT INTO admin_users (id, email, full_name, role, is_active)
+VALUES (
+  '<paste-uuid-from-step-3-1>',
+  'youremail@example.com',
+  'Your Name',
+  'super_admin',
+  true
+);
+```
+
+### Step 3.3: Login to Admin Panel
+
+- Visit `https://your-app.vercel.app/admin`
+- You will be redirected to `/admin/login`
+- Sign in with the credentials from Step 3.1
+- You now have full super_admin access
+
+### Step 3.4: Add More Admins
+
+Once logged in as super_admin:
+1. Go to **Admin Panel → Admins** (shield icon in sidebar)
+2. Click **"Add Admin"**
+3. Enter their name, email, temporary password, and role
+4. They can log in at `/admin/login` immediately
+
+**Roles:**
+- `super_admin` — full access including admin user management
+- `admin` — access to orders, products, customers, analytics
+
+---
+
+## 4. Vercel Deployment (15 mins)
+
+### Step 4.1: Push to GitHub
 ```bash
 # Initialize git if you haven't
 git init
@@ -82,7 +129,7 @@ git remote add origin https://github.com/your-username/mystore.git
 git push -u origin main
 ```
 
-### Step 3.2: Connect to Vercel
+### Step 4.2: Connect to Vercel
 1. Go to https://vercel.com and sign in with GitHub
 2. Click "Add New..." → "Project"
 3. Select your `mystore` repository
@@ -95,15 +142,15 @@ git push -u origin main
 
 _Your app is now live! Vercel will give you a URL like `mystore-abc123.vercel.app`_
 
-## 4. Custom Domain Setup (15 mins)
+## 5. Custom Domain Setup (15 mins)
 
-### Step 4.1: Buy Domain from Cloudflare
+### Step 5.1: Buy Domain from Cloudflare
 1. Go to https://dash.cloudflare.com/domains
 2. Search for your desired domain (e.g., `mystore.com`)
 3. Register it (Cloudflare Registrar pricing: ~$10/year)
 4. Complete purchase
 
-### Step 4.2: Connect to Vercel
+### Step 5.2: Connect to Vercel
 1. In Vercel dashboard, go to your project
 2. **Settings** → **Domains**
 3. Add domain: type your domain name
@@ -115,7 +162,7 @@ _Your app is now live! Vercel will give you a URL like `mystore-abc123.vercel.ap
 
 _Your store is now at `mystore.com`!_
 
-## 5. Payment Gateway Integration (30-45 mins)
+## 6. Payment Gateway Integration (30-45 mins)
 
 ### Option A: Paymob (Recommended for Egypt)
 
@@ -179,7 +226,7 @@ export async function POST(request: NextRequest) {
 2. Get merchant code and API key
 3. Same process as Paymob above
 
-## 6. Order Management Setup
+## 7. Order Management Setup
 
 ### Email Notifications (Optional)
 

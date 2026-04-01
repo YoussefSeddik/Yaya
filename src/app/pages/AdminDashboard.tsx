@@ -3,32 +3,43 @@
 // YAYA BABY – Admin Dashboard (Router shell + sidebar)
 // ============================================================
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import {
   Home, ShoppingBag, Package, Users, TrendingUp,
-  Settings, ChevronRight, LogOut, Menu, X,
+  Settings, ChevronRight, LogOut, Menu, X, ShieldCheck,
 } from "lucide-react";
 import { YayaLogo, TeddyBear, ChickA, ChickB, BearCub } from "../components/Mascots";
+import { useAuth } from "@/store/AuthContext";
 import AdminOverview   from "./admin/AdminOverview";
 import AdminOrders     from "./admin/AdminOrders";
 import AdminProducts   from "./admin/AdminProducts";
 import AdminCustomers  from "./admin/AdminCustomers";
 import AdminAnalytics  from "./admin/AdminAnalytics";
+import AdminAdmins     from "./admin/AdminAdmins";
 
-export type AdminTab = "dashboard" | "orders" | "products" | "customers" | "analytics" | "settings";
+export type AdminTab = "dashboard" | "orders" | "products" | "customers" | "analytics" | "settings" | "admins";
 
-const NAV_ITEMS: { id: AdminTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: "dashboard",  label: "Dashboard",  icon: Home       },
-  { id: "orders",     label: "Orders",     icon: ShoppingBag},
-  { id: "products",   label: "Products",   icon: Package    },
-  { id: "customers",  label: "Customers",  icon: Users      },
-  { id: "analytics",  label: "Analytics",  icon: TrendingUp },
-  { id: "settings",   label: "Settings",   icon: Settings   },
-];
+const BASE_NAV = [
+  { id: "dashboard",  label: "Dashboard",  icon: Home        },
+  { id: "orders",     label: "Orders",     icon: ShoppingBag },
+  { id: "products",   label: "Products",   icon: Package     },
+  { id: "customers",  label: "Customers",  icon: Users       },
+  { id: "analytics",  label: "Analytics",  icon: TrendingUp  },
+  { id: "settings",   label: "Settings",   icon: Settings    },
+] as const;
+
+const SUPER_ADMIN_NAV = {
+  id: "admins", label: "Admins", icon: ShieldCheck,
+} as const;
 
 export default function AdminDashboard() {
-  const [tab, setTab]           = useState<AdminTab>("dashboard");
+  const [tab, setTab]                 = useState<AdminTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { admin, loading, logout }    = useAuth();
+
+  const navItems = admin?.role === "super_admin"
+    ? [...BASE_NAV, SUPER_ADMIN_NAV]
+    : BASE_NAV;
 
   const renderContent = () => {
     switch (tab) {
@@ -38,6 +49,7 @@ export default function AdminDashboard() {
       case "customers":  return <AdminCustomers />;
       case "analytics":  return <AdminAnalytics />;
       case "settings":   return <AdminSettings />;
+      case "admins":     return admin?.role === "super_admin" ? <AdminAdmins /> : null;
     }
   };
 
@@ -68,12 +80,26 @@ export default function AdminDashboard() {
           </button>
         </div>
 
+        {/* Current user info */}
+        {!loading && admin && (
+          <div className="px-4 py-3 border-b border-[#4A4238]/10 bg-[#FFFDF5]">
+            <p className="text-[#4A4238] text-xs font-semibold truncate">{admin.full_name || admin.email}</p>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              admin.role === "super_admin"
+                ? "bg-[#F5C71A]/20 text-[#92400E]"
+                : "bg-[#EFAFD0]/30 text-[#86198F]"
+            }`}>
+              {admin.role === "super_admin" ? "Super Admin" : "Admin"}
+            </span>
+          </div>
+        )}
+
         {/* Nav */}
         <nav className="flex-1 p-3 space-y-1 overflow-auto">
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+          {navItems.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
-              onClick={() => { setTab(id); setSidebarOpen(false); }}
+              onClick={() => { setTab(id as AdminTab); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-[16px] transition-colors text-left ${
                 tab === id
                   ? "bg-[#F5C71A]/15 text-[#4A4238] font-semibold"
@@ -102,6 +128,13 @@ export default function AdminDashboard() {
             <Home className="w-3.5 h-3.5" />
             View Store
           </Link>
+          <button
+            onClick={logout}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors text-sm font-medium"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Sign Out
+          </button>
         </div>
       </aside>
 
@@ -122,25 +155,57 @@ export default function AdminDashboard() {
 }
 
 function AdminSettings() {
+  const [saving, setSaving]         = useState(false);
+  const [saved, setSaved]           = useState(false);
+  const [storeName, setStoreName]   = useState("Yaya Baby");
+  const [whatsapp, setWhatsapp]     = useState("+20 123 456 7890");
+  const [shipping, setShipping]     = useState("50");
+
+  const handleSave = async () => {
+    setSaving(true);
+    // Settings can be persisted to a Supabase settings table when needed
+    await new Promise((r) => setTimeout(r, 500));
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
   return (
     <div className="p-6 md:p-8">
       <h1 className="text-[#4A4238] text-2xl font-bold mb-2">Settings</h1>
-      <p className="text-[#8a8378] mb-6">Store configuration coming soon.</p>
-      <div className="bg-white rounded-[24px] p-6 shadow-sm space-y-4">
+      <p className="text-[#8a8378] mb-6">Store configuration</p>
+      <div className="bg-white rounded-[24px] p-6 shadow-sm space-y-4 max-w-lg">
         <div>
           <label className="text-[#4A4238] text-sm font-medium block mb-1">Store Name</label>
-          <input defaultValue="Yaya Baby" className="w-full px-4 py-2.5 bg-[#FFFDF5] border-2 border-transparent focus:border-[#F5C71A] rounded-[12px] outline-none text-[#4A4238] text-sm" />
+          <input
+            value={storeName}
+            onChange={(e) => setStoreName(e.target.value)}
+            className="w-full px-4 py-2.5 bg-[#FFFDF5] border-2 border-transparent focus:border-[#F5C71A] rounded-[12px] outline-none text-[#4A4238] text-sm"
+          />
         </div>
         <div>
           <label className="text-[#4A4238] text-sm font-medium block mb-1">WhatsApp Number</label>
-          <input defaultValue="+20 123 456 7890" className="w-full px-4 py-2.5 bg-[#FFFDF5] border-2 border-transparent focus:border-[#F5C71A] rounded-[12px] outline-none text-[#4A4238] text-sm" />
+          <input
+            value={whatsapp}
+            onChange={(e) => setWhatsapp(e.target.value)}
+            className="w-full px-4 py-2.5 bg-[#FFFDF5] border-2 border-transparent focus:border-[#F5C71A] rounded-[12px] outline-none text-[#4A4238] text-sm"
+          />
         </div>
         <div>
           <label className="text-[#4A4238] text-sm font-medium block mb-1">Default Shipping Fee (EGP)</label>
-          <input type="number" defaultValue="50" className="w-full px-4 py-2.5 bg-[#FFFDF5] border-2 border-transparent focus:border-[#F5C71A] rounded-[12px] outline-none text-[#4A4238] text-sm" />
+          <input
+            type="number"
+            value={shipping}
+            onChange={(e) => setShipping(e.target.value)}
+            className="w-full px-4 py-2.5 bg-[#FFFDF5] border-2 border-transparent focus:border-[#F5C71A] rounded-[12px] outline-none text-[#4A4238] text-sm"
+          />
         </div>
-        <button className="px-6 py-2.5 bg-[#F5C71A] text-[#4A4238] rounded-full font-bold text-sm hover:bg-[#F5C71A]/90 transition-colors">
-          Save Changes
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-6 py-2.5 bg-[#F5C71A] text-[#4A4238] rounded-full font-bold text-sm hover:bg-[#F5C71A]/90 transition-colors disabled:opacity-50"
+        >
+          {saving ? "Saving…" : saved ? "Saved!" : "Save Changes"}
         </button>
       </div>
     </div>

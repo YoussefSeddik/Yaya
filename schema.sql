@@ -124,6 +124,33 @@ CREATE POLICY "Service role manages order items"
   USING (auth.jwt() ->> 'role' = 'service_role');
 
 -- =====================================================
+-- 5. ADMIN USERS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS admin_users (
+  id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email       TEXT NOT NULL,
+  full_name   TEXT NOT NULL DEFAULT '',
+  role        TEXT NOT NULL DEFAULT 'admin'
+              CHECK (role IN ('super_admin', 'admin')),
+  is_active   BOOLEAN NOT NULL DEFAULT true,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
+
+-- Admin can read their own record (for middleware session check)
+CREATE POLICY "Admin reads own record"
+  ON admin_users FOR SELECT
+  USING (auth.uid() = id);
+
+-- Service role manages all admin users
+CREATE POLICY "Service role manages admin users"
+  ON admin_users FOR ALL
+  USING (auth.jwt() ->> 'role' = 'service_role');
+
+CREATE INDEX IF NOT EXISTS idx_admin_users_role ON admin_users(role);
+
+-- =====================================================
 -- SEED: Sample products (optional — delete if not needed)
 -- =====================================================
 INSERT INTO products (name, price, cost, stock, sku, category, image, sizes, colors, is_active)
