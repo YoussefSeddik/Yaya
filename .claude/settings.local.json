@@ -13,7 +13,14 @@
       "Bash(grep -E \"\\\\.\\(ts|js|json|xml|yml|html|tsx\\)$\")",
       "Read(//Users/youssefseddik/Downloads/E-commerce Mobile App Design/**)",
       "Bash(ls /Users/youssefseddik/Downloads/Yaya/.env*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//Users/youssefseddik/Downloads/Yaya/**)",
+      "Bash(done)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
