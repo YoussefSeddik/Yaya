@@ -11,7 +11,9 @@
       "Bash(curl -s http://localhost:3000)",
       "Bash(find '/Users/youssefseddik/Downloads/E-commerce Mobile App Design' -maxdepth 1 -type f -name .* ! -name .git ! -name .gitignore ! -name .env*)",
       "Bash(grep -E \"\\\\.\\(ts|js|json|xml|yml|html|tsx\\)$\")",
-      "Read(//Users/youssefseddik/Downloads/E-commerce Mobile App Design/**)"
+      "Read(//Users/youssefseddik/Downloads/E-commerce Mobile App Design/**)",
+      "Bash(ls /Users/youssefseddik/Downloads/Yaya/.env*)",
+      "Bash(npm run:*)"
     ]
   }
 }

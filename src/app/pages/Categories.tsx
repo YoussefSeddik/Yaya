@@ -40,11 +40,39 @@ export default function Categories() {
   const [sortBy, setSortBy]             = useState("Featured");
   const [showFilters, setShowFilters]   = useState(false);
   const [maxPrice, setMaxPrice]         = useState(1000);
+  const [showTabs, setShowTabs]         = useState(true);
+  const [lastScrollY, setLastScrollY]   = useState(0);
 
   const { addItem }                         = useCart();
   const { toggleItem, isWished }            = useWishlist();
 
   useEffect(() => { loadProducts(); }, []);
+
+  useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down
+        setShowTabs(false);
+      } else {
+        // Scrolling up
+        setShowTabs(true);
+      }
+      
+      scrollTimeout = setTimeout(() => {
+        setLastScrollY(currentScrollY);
+      }, 100);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [lastScrollY]);
 
   async function loadProducts() {
     setLoading(true);
@@ -112,6 +140,40 @@ export default function Categories() {
           </button>
         </div>
       </header>
+
+      {/* ── Category Tabs ── */}
+      <div className={`sticky top-14 z-40 bg-white border-b border-[#4A4238]/10 px-4 py-2 transition-all duration-300 overflow-hidden ${
+        showTabs ? "max-h-16 opacity-100" : "max-h-0 opacity-0"
+      }`}>
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          <button
+            onClick={() => setSelectedCats([])}
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+              selectedCats.length === 0
+                ? "bg-[#F5C71A] text-[#4A4238]"
+                : "bg-white text-[#8a8378] border border-[#4A4238]/10 hover:bg-[#FFFDF5]"
+            }`}
+          >
+            All
+          </button>
+          {["Onesies", "Sets", "Rompers", "Sleepwear"].map((cat) => {
+            const isActive = selectedCats.includes(cat as ProductCategory);
+            return (
+              <button
+                key={cat}
+                onClick={() => setSelectedCats(isActive ? [] : [cat as ProductCategory])}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                  isActive
+                    ? "bg-[#EFAFD0] text-[#4A4238]"
+                    : "bg-white text-[#8a8378] border border-[#4A4238]/10 hover:bg-[#FFFDF5]"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Filter Panel */}
       {showFilters && (

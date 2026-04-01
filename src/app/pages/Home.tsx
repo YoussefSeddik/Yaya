@@ -6,15 +6,14 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import {
   ShoppingCart, Heart, User, Home as HomeIcon, Grid3x3,
-  Search, X, Star, Package, TrendingUp, Baby,
-  ChevronRight, Flame, Sparkles,
+  Search, X, ChevronRight, Flame,
 } from "lucide-react";
 import { YayaLogo, ChickA, TeddyBear, ChickB, BearCub } from "../components/Mascots";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { useCart }     from "@/store/CartContext";
 import { useWishlist } from "@/store/WishlistContext";
 import { getProducts } from "@/services/products.service";
-import type { Product, AgeSize, ProductCategory } from "@/app/types";
+import type { Product, AgeSize } from "@/app/types";
 
 // ── Brand constants ───────────────────────────────────────────
 const brandImage = "/assets/brand-hero.png";
@@ -26,13 +25,7 @@ const AGE_CATEGORIES: { label: string; size?: AgeSize; icon: React.ComponentType
   { label: "12–18M",size: "12-18M",icon: BearCub  },
 ];
 
-const PRODUCT_CATEGORIES: { label: ProductCategory | "All"; icon: React.ComponentType<{ className?: string }> }[] = [
-  { label: "All",        icon: Sparkles   as unknown as React.ComponentType<{ className?: string }> },
-  { label: "Onesies",    icon: Baby       as unknown as React.ComponentType<{ className?: string }> },
-  { label: "Sets",       icon: Package    as unknown as React.ComponentType<{ className?: string }> },
-  { label: "Rompers",    icon: TrendingUp as unknown as React.ComponentType<{ className?: string }> },
-  { label: "Sleepwear",  icon: Star       as unknown as React.ComponentType<{ className?: string }> },
-];
+
 
 // ── Bottom Nav Items ──────────────────────────────────────────
 function BottomNav({ active }: { active: "home" | "categories" | "cart" | "wishlist" | "account" }) {
@@ -41,7 +34,7 @@ function BottomNav({ active }: { active: "home" | "categories" | "cart" | "wishl
 
   const items = [
     { id: "home",       to: "/",           icon: HomeIcon,    label: "Home" },
-    { id: "categories", to: "/categories", icon: Grid3x3,     label: "Shop" },
+    { id: "categories", to: "/categories", icon: Grid3x3,     label: "Categories" },
     { id: "cart",       to: "/cart",       icon: ShoppingCart,label: "Cart",    badge: itemCount },
     { id: "wishlist",   to: "/wishlist",   icon: Heart,       label: "Saved",   badge: count },
     { id: "account",    to: "/account",    icon: User,        label: "Account" },
@@ -171,20 +164,18 @@ export default function Home() {
   const [searchQuery, setSearchQuery]   = useState("");
   const [showSearch, setShowSearch]     = useState(false);
   const [selectedSize, setSelectedSize] = useState<AgeSize | undefined>();
-  const [selectedCat,  setSelectedCat]  = useState<ProductCategory | "All">("All");
   const { itemCount }  = useCart();
   const { count: wishCount } = useWishlist();
 
   useEffect(() => {
     loadProducts();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSize, selectedCat]);
+  }, [selectedSize]);
 
   async function loadProducts() {
     setLoading(true);
     const res = await getProducts({
       size:     selectedSize,
-      category: selectedCat === "All" ? undefined : selectedCat,
       is_active: true,
     });
     setProducts(res.data);
@@ -326,33 +317,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Product Category Tabs ── */}
-      <section className="px-4 pt-2 pb-2">
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {PRODUCT_CATEGORIES.map((cat) => {
-            const isActive = selectedCat === cat.label;
-            return (
-              <button
-                key={cat.label}
-                onClick={() => setSelectedCat(cat.label)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  isActive
-                    ? "bg-[#F5C71A] text-[#4A4238]"
-                    : "bg-white text-[#8a8378] hover:bg-[#FFFDF5]"
-                }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
-      </section>
+
 
       {/* ── Products Grid ── */}
       <section className="px-4 pt-2">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[#4A4238] font-semibold text-sm">
-            {searchQuery ? `Results for "${searchQuery}"` : selectedCat === "All" ? "All Products" : selectedCat}
+            {searchQuery ? `Results for "${searchQuery}"` : "All Products"}
             <span className="text-[#8a8378] font-normal ml-1.5">({filtered.length})</span>
           </h3>
         </div>
